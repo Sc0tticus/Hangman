@@ -1,8 +1,9 @@
-import { KeyboardEvent, useState, useEffect, useCallback } from 'react';
-import words from './wordList.json';
+import { useState, useEffect, useCallback } from 'react';
 import { HangmanDrawing } from './HangmanDrawing';
 import { HangmanWord } from './HangmanWord';
 import { Keyboard } from './Keyboard';
+
+import words from './wordList.json';
 
 const getWord = () => {
 	return words[Math.floor(Math.random() * words.length)];
@@ -24,8 +25,24 @@ const App = () => {
 
 			setGuessedLetters(currentLetters => [...currentLetters, letter]);
 		},
-		[guessedLetters]
+		[guessedLetters, isLoser, isWinner]
 	);
+
+	useEffect(() => {
+		const handler = (event: KeyboardEvent) => {
+			const key = event.key;
+			if (!key.match(/^[a-z]$/)) return;
+
+			event.preventDefault();
+			addGuessedLetter(key);
+		};
+
+		document.addEventListener('keypress', handler);
+
+		return () => {
+			document.removeEventListener('keypress', handler);
+		};
+	}, [guessedLetters, addGuessedLetter]);
 
 	useEffect(() => {
 		const handler = (event: KeyboardEvent) => {
@@ -42,23 +59,7 @@ const App = () => {
 		return () => {
 			document.removeEventListener('keypress', handler);
 		};
-	}, [guessedLetters, isWinner, isLoser]);
-
-	useEffect(() => {
-		const handler = (event: KeyboardEvent) => {
-			const key = event.key;
-			if (!key.match(/^[a-z]$/)) return;
-
-			event.preventDefault();
-			addGuessedLetter(key);
-		};
-
-		document.addEventListener('keypress', handler);
-
-		return () => {
-			document.removeEventListener('keypress', handler);
-		};
-	}, [guessedLetters, isWinner, isLoser]);
+	}, []);
 
 	return (
 		<div
